@@ -43,8 +43,14 @@ sub ajax {
         # disable layout
         my $layout = $plugin->app->config->{'layout'};
         $plugin->app->config->{'layout'} = undef;
-        my $response = $code->();
+        my $response = eval { $code->(); };
+        my $error = $@;
+        # Restore layout first
         $plugin->app->config->{'layout'} = $layout;
+        # Then give way to the route exception
+        if( $error ) {
+            die($error);
+        }
         return $response;
     };
 
